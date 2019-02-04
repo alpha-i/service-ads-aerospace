@@ -1,0 +1,39 @@
+{% import 'macros/macros.html' as general_macros %}
+
+{% macro print_detection_task_list(task_list) %}
+    {% if task_list|length > 0 %}
+        <table class="table table-bordered" id="datasource-task-list" data-urlprefix="/detect">
+            <thead>
+            <tr>
+                <th>name</th>
+                <th>type</th>
+                <th>created on</th>
+                <th>flight</th>
+                <th>status</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for task in task_list %}
+                <tr class='task-row' id="{{ task.task_code }}" data-completed="{{ task.is_completed }}">
+                    <td scope="row"><a
+                            href="{{ url_for('detection.detail', task_code=task.task_code) }}"
+                            title="{{ task.task_code }}">{{ task.name|truncate(25) }}</a>
+                    </td>
+                    <td scope="row">{{ task.datasource.datasource_configuration.name }}</td>
+                    <td>{{ general_macros.format_datetime(task.created_at) }}</td>
+                    <td>
+                        <a href="{{ url_for('datasource.detail', upload_code=task.upload_code) }}">
+                            {{ task.datasource.name|truncate(25) }}
+                        </a>
+                    </td>
+                    <td><i class="fa {{ general_macros.get_task_status_icon(task.statuses[-1].state) }}"
+                           alt="{{ task.statuses[-1].state }}"></i></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No tasks found.</p>
+    {% endif %}
+{% endmacro %}

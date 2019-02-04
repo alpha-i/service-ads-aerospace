@@ -1,0 +1,61 @@
+<div class="form-group row">
+    <form action="{{ url_for('datasource.upload') }}" method="post" enctype="multipart/form-data" id="upload_form"
+          autocomplete="off"
+    >
+        <div class="col-lg-3">
+            <input
+                    type="text"
+                    name="name"
+                    class="form-control limited_input_field"
+                    placeholder="Name..."
+                    required="required"
+                    id="upload_name">
+            <em>Use only letters, numbers, _ - and space </em>
+        </div>
+        <div class="col-lg-3">
+            <div class="input-group">
+                <input type="text" id="file_path" class="form-control" placeholder="Browse...">
+                <span class="input-group-btn">
+                <button class="btn btn-default" type="button" id="browse_btn">
+                    <i class="fa fa-search"></i> Browse
+                </button>
+            </span>
+            </div>
+            <input type="file" class="hidden" name="upload" id="upload"
+                   accept="{{ allowed_extensions }}" data-maxsize="{{ max_file_size }}">
+            <em>Max file size: 2GB</em>
+        </div>
+        <div class="col-lg-3">
+            <div class="form-group">
+                <select name="datasource_type_id" class="form-control">
+                    {% for datasource_type in datasource_types %}
+                        <option value="{{ datasource_type.id }}">{{ datasource_type.name }}</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <input class="btn btn-primary" type="submit" value="Upload file" id="submit" name="submit" disabled>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div id="progress_container" class="hide">
+            <div class="progress"></div>
+            <div class="mb-3">
+                Uploaded: <span class="bytes_uploaded"></span> MB of <span class="bytes_total"></span> MB (<span
+                    class="percent"></span>)
+            </div>
+            <div>
+                <a class="btn btn-danger hide mb-3" id="upload_cancel_btn">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div id="message_area"></div>
+    </div>
+</div>

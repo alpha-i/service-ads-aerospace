@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm your email address</title>
+</head>
+<body>
+
+<div>
+    <p>Hello {{ email|safe }}</p>
+    <p>Someone registered this address on ADS - the Alpha-I Detection system.</p>
+    <p>Please confirm your email address by following <a href="{{ url_for('user.confirm', token=token, _external=True) }}">this link</a></p>
+</div>
+
+</body>
+</html>

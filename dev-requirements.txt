@@ -1,0 +1,7 @@
+-r requirements.txt
+ipython==6.2.1
+ipython-genutils==0.2.0
+pytest
+honcho
+Flask-Testing==0.7.1
+ipdb

@@ -1,0 +1,101 @@
+<form action="{{ url_for('training.submit') }}" method="post" enctype="multipart/form-data" id="new_training"
+      autocomplete="off"
+>
+    <div class="form-group row">
+        <div class="col-lg-4">
+            <label for="training_name">Name <em class="small">(Use only letters, numbers, _ - and space )</em></label>
+
+            <input
+                    type="text"
+                    name="name"
+                    class="form-control limited_input_field"
+                    placeholder="Name..."
+                    required="required"
+                    id="training_name">
+        </div>
+        <div class="col-lg-4">
+            <div class="form-group">
+                <label for="datasource_configuration_id">Flight type</label>
+                <select id="datasource_configuration_id" name="datasource_configuration_id" class="form-control"
+                        required="required">
+                    <option value="">Choose flight type</option>
+                    {% for datasource_config in datasource_configurations %}
+                        <option value="{{ datasource_config.id }}">{{ datasource_config.name }}</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="form-group">
+                <label for="parent_training_id">Parent training</label>
+                <select id="parent_training_id" name="parent_training_id" class="form-control" data-live-search="true">
+                    <option value="">Choose Parent Training (optional)</option>
+                </select>
+
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-4">
+            <div class="form-group">
+                <label for="enable_fft">Domain</label>
+                <select id="enable_fft" name="enable_fft" class="form-control">
+                    <option value="0" selected>TIME DOMAIN</option>
+                    <option value="1">FREQUENCY DOMAIN</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label for="downsample_factor">Downsample factor</label>
+            <select name="downsample_factor" id="downsample_factor" class="form-control" required>
+                <option value="4">4</option>
+                <option value="20">20</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+            </select>
+        </div>
+        <div class="col-lg-4">
+            <label for="train_iters">Number of iterations</label>
+            <select name="train_iters" id="train_iters" class="form-control" required>
+                <option value="5000">5,000 (~30m)</option>
+                <option value="10000">10,000 (~1h)</option>
+                <option value="50000" selected>50,000 (~5h)</option>
+            </select>
+        </div>
+
+    </div>
+<div class="row">
+    <div class="col-lg-12">
+        <input class="btn btn-primary" type="submit" value="Start training" id="submit" name="submit">
+    </div>
+</div>
+</form>
+<hr />
+<div class="row">
+    <div class="col-lg-12">
+        <h4 class="text-blue"><i class="fa fa-info-circle"></i> Legend</h4>
+        <dl class="dl-horizontal">
+            <dt>Name</dt>
+            <dd>Name chosen by the user for the new training.</dd>
+
+            <dt>Flight type</dt>
+            <dd>Select from the existing types of flight data.</dd>
+
+            <dt>Parent training</dt>
+            <dd>Select a parent training if you want the new model to originate from a pre-existing model configuration.</dd>
+
+            <dt>Domain</dt>
+            <dd>Select between time and frequency (fft) domain.</dd>
+
+            <dt>Downsample factor</dt>
+            <dd>Factor by which the resolution of the input data is reduced. E.g. A downsample factor of 100 means that input data sampled at 1kHz will be processed at a resolution of 10Hz by means of averaging.</dd>
+
+            <dt>Number of iterations</dt>
+            <dd>Number of iterations used to train the model. We recommend: 50,000 for a training from scratch; 10,000 for a re-training.</dd>
+        </dl>
+
+    </div>
+</div>
+

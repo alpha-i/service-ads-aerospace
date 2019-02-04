@@ -1,0 +1,23 @@
+{% extends "layout/main.html" %}
+{% set page_title %}New trained Model{% endset %}
+
+{% block page_header %}
+    <h1>
+        Create new Trained Model
+        <small></small>
+    </h1>
+{% endblock %}
+{% block breadcrumb_items %}
+    {{ super() }}
+    <li><a href="{{ url_for('train.list') }}"><i class="fa fa-list"></i>Trained Model List</a></li>
+
+{% endblock %}
+
+{% block content %}
+    <h1>THE CONTENT</h1>
+{% endblock %}
+
+
+{% block footer_js %}
+    {{ super() }}
+{% endblock %}

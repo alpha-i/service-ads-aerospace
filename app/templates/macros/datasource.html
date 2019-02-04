@@ -1,0 +1,48 @@
+{% import 'macros/macros.html' as general_macros %}
+
+{% macro print_datasource_info(datasource, label_types, editable=True) -%}
+    <div class="row">
+        <div class="col-lg-4">
+            <dl class="dl-horizontal">
+                <dt>Name</dt>
+                <dd>{{ datasource.name }}</dd>
+
+                <dt>Code</dt>
+
+                <dd>
+                    <a href="{{ url_for('datasource.detail', upload_code=datasource.upload_code) }}">
+                        {{ datasource.upload_code }}
+                    </a>
+                </dd>
+
+                <dt>Created</dt>
+                <dd>{{ general_macros.format_datetime(datasource.created_at) }}</dd>
+
+                <dt>Flight Type</dt>
+                <dd>{{ datasource.datasource_configuration.name }}</dd>
+            </dl>
+        </div>
+        <div class="col-lg-4">
+            <dl class="dl-horizontal">
+                <dt>Sample rate</dt>
+                <dd>{{ datasource.datasource_configuration.meta.sample_rate }}</dd>
+                <dt>Label</dt>
+                <dd>
+                    <form name="set_datasource_label" class="form-inline"
+                          action="{{ url_for('datasource.save_label') }}" method="post">
+                            <select name="datasource_label" class="form-control">
+                                <option value="">UNLABELLED</option>
+                                {% for key, value in label_types.items() %}
+                                    <option value="{{ key }}" {% if datasource.label.name == key %}
+                                            selected {% endif %}>{{ key }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="upload_code" value="{{ datasource.upload_code }}"/>
+                            <input class="btn btn-link" type="submit" value="Update Label" id="submit" name="submit">
+                    </form>
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+{%- endmacro %}

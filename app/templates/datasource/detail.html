@@ -1,0 +1,143 @@
+{% extends "layout/main.html" %}
+{% set page_title %}Flight - {{ datasource.name }}{% endset %}
+
+{% block page_header %}
+    <h1>
+        Flight: <em>{{ datasource.name }}</em>
+    </h1>
+{% endblock %}
+{% block breadcrumb_items %}
+    {{ super() }}
+    <li><a class="active"><i class="fa fa-plane"></i>Data Details</a></li>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Info</h3>
+                <div class="box-body">
+                    {{ datasource_macros.print_datasource_info(datasource, label_types) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Content</h3>
+                <div class="box-body">
+                    <div id="datasource_chart"
+                         data-yaxis="Value"
+                         data-name="datasource_{{ datasource.name }}"
+                         data-title="Content of {{ datasource.name }}"
+                         class="responsive-plot"
+                    >
+                        <div class="text-center">loading graph.. <i class="fa fa-spinner fa-spin"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-info">
+                <h3 class="box-header with-border">New Detection</h3>
+                <div class="box-body">
+                    {% if training_task_list %}
+                        {% include 'partial/detection_new_form.html' %}
+                    {% else %}
+                        No suitable training found. <a href="{{ url_for('training.list') }}">Add one</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Detection associated with this Data Upload</h3>
+                <div class="box-body">
+                    {{ detect_macros.print_detection_task_list(detection_task_list) }}
+                </div>
+            </div>
+        </div>
+    </div>
+      <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Training associated with this Data Upload</h3>
+                <div class="box-body">
+                    {{ training_macros.print_training_list(datasource._model.training_task_list) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if not datasource.is_part_of_training_set %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-danger">
+                <h3 class="box-header with-border">Delete the flight "{{ datasource.name }}"</h3>
+                <div class="box-body text-right">
+                    <a class="btn btn-danger" data-toggle="modal" data-target="#modal-delete-form">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal modal-warning fade" id="modal-delete-form">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Confirm deletion of {{ datasource.upload_code }}</h4>
+                </div>
+                <div class="modal-body">
+                    <h4><i class="fa fa-warning"></i> Warning</h4>
+                    <p>By deleting this Data Upload, all the associated tasks will be deleted.</p>
+                    <p>THIS OPERATION IS IRREVERSIBLE!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                    <form action="{{ url_for('datasource.delete', datasource_id=datasource.upload_code) }}"
+                          method="POST" id="datasource-delete">
+                        <div class="form-group">
+                            <a id="delete-flight-button" class="btn btn-outline">Confirm deletion</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+    {% endif %}
+{% endblock %}
+
+{% block footer_js %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/datasource.js') }} "></script>
+    <script>
+        $(document).ready(function ($) {
+            var refresher = new RefreshTaskList('#datasource-task-list', DataSourceResultInterpreter, DataSourceRowBuilder)
+            refresher.run();
+
+            Plotly.d3.csv(
+                "{{ url_for('datasource.data_csv', upload_code=datasource.upload_code) }}",
+                function (err, data) {
+                    ChartController.lineChart("datasource_chart", data);
+                    ChartController.makeResponsive()
+                })
+
+            $('#delete-flight-button').on('click',
+                function () {
+                    $('#modal-delete-form').modal('hide');
+                    MainSpinner.show();
+                    $('#datasource-delete').submit();
+                }
+            )
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,28 @@
+<div class="form-group row">
+    <form action="{{ url_for('detection.submit', upload_code=datasource.upload_code) }}" method="post" enctype="multipart/form-data" id="new_prediction"
+          autocomplete="off"
+    >
+        <div class="col-lg-3">
+            <input
+                    type="text"
+                    name="name"
+                    class="form-control limited_input_field"
+                    placeholder="Name..."
+                    required="required"
+                    id="detection_name">
+            <em>Use only letters, numbers, _ - and space </em>
+        </div>
+        <div class="col-lg-3">
+            <div class="form-group">
+                <select name="training_task_code" class="form-control" required="required">
+                    {% for training in training_task_list %}
+                        <option value="{{ training.task_code }}">{{ training.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <input class="btn btn-primary" type="submit" value="Start new detection" id="submit" name="submit">
+        </div>
+    </form>
+</div>

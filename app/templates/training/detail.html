@@ -1,0 +1,144 @@
+{% extends "layout/main.html" %}
+{% set page_title %}Training - {{ training_task.name }}{% endset %}
+
+{% block page_header %}
+    <h1>
+        Training: {{ training_task.name }}
+    </h1>
+{% endblock %}
+{% block breadcrumb_items %}
+    {{ super() }}
+    <li><a href="{{ url_for('training.list') }}"><i class="fa fa-list"></i>Training List</a></li>
+    <li><a class="active"><i class="fa fa-flask"></i>Training</a></li>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Info</h3>
+                <div class="box-body">
+                    {{ training_macros.print_training_details(training_task) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box">
+                <h3 class="box-header with-border">Status log</h3>
+                <div class="box-body">
+                    <table class="table table-bordered training-log" id="training_{{ training_task.task_code }}"
+                           data-taskcode="{{ training_task.task_code }}"
+                           data-completed="{{ training_task.is_completed }}"
+                           data-url="{{ url_for('training.detail', training_task_code=training_task.task_code) }}">
+                        <thead>
+                        <tr>
+                            <th>created</th>
+                            <th>status</th>
+                            <th>message</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for status in training_task.statuses %}
+
+                            <tr>
+                                <td>{{ general_macros.format_datetime(status.created_at) }}</td>
+                                <td>{{ status.state }}</td>
+                                <td>{{ status.message }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-right text-green text-bold">
+
+                                Elapsed time: <span class="elapsed-detection-time">
+                                    {% if not training_task.is_completed %}
+                                        <i class="status-spinner fa fa-refresh fa-spin"></i>
+                                    {% else %}
+                                        {{ training_task.running_time }}
+                                    {% endif %}
+                                    </span>
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Detections associated</h3>
+                <div class="box-body">
+                    {{ detect_macros.print_detection_task_list(training_task.detection_task_list) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if training_task.detection_task_list|length == 0 %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-danger">
+                    <h3 class="box-header with-border">Delete this training</h3>
+                    <div class="box-body text-right">
+                        <a class="btn btn-danger " data-toggle="modal" data-target="#modal-delete-form">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="modal modal-warning fade" id="modal-delete-form">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Confirm deletion of {{ training_task.task_code }}</h4>
+                </div>
+                <div class="modal-body">
+                    <h4><i class="fa fa-warning"></i> Warning</h4>
+                    {% if not training_task.is_completed %}
+                        <p>Training for {{ training_task.name }} is currently in progress. Deleting the task will terminate the training immediately.</p>
+                    {% endif %}
+                    <p>THIS OPERATION IS IRREVERSIBLE!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                    <form action="{{ url_for('training.delete', training_task_code=training_task.task_code) }}"
+                          method="POST" id="detection-delete">
+                        <div class="form-group">
+                            <a id="delete-train-button" class="btn btn-outline">Confirm deletion</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+{% endblock %}
+
+
+{% block footer_js %}
+    {{ super() }}
+    <script>
+        function resultInterpreter(object) {
+            return object.training_task
+        }
+
+        refresher = new RefreshStatusTable('.training-log', resultInterpreter);
+        refresher.run();
+        $('#delete-train-button').on('click',
+            function() {
+                $('#modal-delete-form').modal('hide');
+                MainSpinner.show();
+                $('#detection-delete').submit();
+            }
+        )
+    </script>
+{% endblock %}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+{% include 'partial/html_header.html' %}
+{% import 'macros/macros.html' as general_macros %}
+<body class="hold-transition skin-alpha-i sidebar-mini">
+    <div class="wrapper">
+    <!-- Main Header -->
+      <header class="main-header">
+
+        <!-- Logo -->
+        <a href="{{ url_for('customer.dashboard') }}" class="logo">
+          <!-- mini logo for sidebar mini 50x50 pixels -->
+          <span class="logo-mini"><img src="{{ url_for('static', filename='img/alpha-i-logo-small.png') }}" title="alpha-i"></span>
+          <!-- logo for regular state and mobile devices -->
+          <span class="logo-lg"><img src="{{ url_for('static', filename='img/alpha-i-logo.png') }}" title="alpha-i"></span>
+        </a>
+      </header>
+
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Main content -->
+        <section class="content container-fluid">
+
+          {% block content %}{% endblock %}
+
+        </section>
+        <!-- /.content -->
+      </div>
+      <!-- /.content-wrapper -->
+
+      <!-- Main Footer -->
+      <footer class="main-footer">
+        <!-- To the right -->
+        <div class="pull-right hidden-xs">
+            <a href="https://www.alpha-i.co/contacts/" target="_blank">Contact Us</a>
+        </div>
+        <!-- Default to the left -->
+        <strong>Copyright &copy; 2018 <a href="https://www.alpha-i.co/" target="_blank">Alpha-I</a>.</strong> All rights reserved.
+      </footer>
+
+    </div>
+
+    </div>
+</body>
+</html>

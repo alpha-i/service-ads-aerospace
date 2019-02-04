@@ -1,0 +1,67 @@
+{% extends "layout/main.html" %}
+{% set page_title %}Training list{% endset %}
+
+{% block page_header %}
+    <h1>
+        Training list
+    </h1>
+{% endblock %}
+{% block breadcrumb_items %}
+    {{ super() }}
+        <li><a class="active"><i class="fa fa-list"></i>Training List</a></li>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-info">
+                <h3 class="box-header with-border">New Training</h3>
+                <div class="box-body">
+                    {% if datasource_configurations %}
+                        {% include 'partial/training_new_form.html' %}
+                    {% else %}
+                        No data source type found, please add one.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-info">
+                <h3 class="box-header with-border">Training list</h3>
+                <div class="box-body">
+                    {{  training_macros.print_training_list(training_task_list)  }}
+                    <div class="text-center">
+                            {{   general_macros.display_paginator(pagination, current_page, 'training.list')  }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block footer_js %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/training.js') }} "></script>
+    <script>
+        $(document).ready(function(){
+            InputFieldController.init();
+
+            var ctrl = ParentTrainingInputController(
+                '#datasource_configuration_id',
+                '#parent_training_id',
+                '{{ url_for('training.json_list') }}'
+            );
+
+            var refresher = new RefreshTaskList('#training-task-list', function (task) {
+                    return task.training_task
+                },
+                TrainingTaskRowBuilder);
+            refresher.run()
+        });
+    </script>
+{% endblock %}

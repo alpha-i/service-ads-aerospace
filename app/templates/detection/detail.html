@@ -1,0 +1,263 @@
+{% extends "layout/main.html" %}
+{% set page_title %}Detection - {{ detection.name }}{% endset %}
+
+{% block page_header %}
+    <h1>
+        Detection: {{ detection.name }}
+        <small></small>
+    </h1>
+{% endblock %}
+{% block breadcrumb_items %}
+    {{ super() }}
+    <li><a href="{{ url_for('detection.list') }}"><i class="fa fa-list"></i>Detection List</a></li>
+    <li><a class="active"><i class="fa fa-area-chart"></i>Detection</a></li>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Info</h3>
+                <div class="box-body">
+                    <dl class="dl-horizontal">
+                        <dt>Name:</dt>
+                        <dd>{{ detection.name }}</dd>
+                        <dt>Created:</dt>
+                        <dd>{{ general_macros.format_datetime(detection.created_at) }}</dd>
+                        <dt>Flight Name</dt>
+                        <dd><a href="{{ url_for('datasource.detail', upload_code=detection.datasource.upload_code) }}">{{ detection.datasource.name }}</a></dd>
+                        <dt>Flight Type</dt>
+                        <dd>{{ detection.datasource.datasource_configuration.name }}</dd>
+                        <dt>Label</dt>
+                        <dd>{{ detection.datasource.label.value|default('UNLABELLED') }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Training info</h3>
+                <div class="box-body">
+                    {{ training_macros.print_training_details(training_task) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box">
+                <h3 class="box-header with-border">Detection status log</h3>
+                <div class="box-body">
+                    <table class="table table-bordered detection-log" id="detection_{{ detection.task_code }}"
+                           data-taskcode="{{ detection.task_code }}"
+                           data-completed="{{ detection.is_completed }}"
+                           data-url="{{ url_for('detection.detail', task_code=detection.task_code) }}">
+                        <thead>
+                        <tr>
+                            <th>created</th>
+                            <th>status</th>
+                            <th>message</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for status in detection.statuses %}
+
+                            <tr>
+                                <td>{{ general_macros.format_datetime(status.created_at) }}</td>
+                                <td>{{ status.state }}</td>
+                                <td>{{ status.message }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td>
+                            </td>
+                            <td colspan="3" class="text-right text-green text-bold">
+
+                                Elapsed time: <span class="elapsed-detection-time">
+                                {% if not detection.is_completed %}
+                                    <i class="status-spinner fa fa-refresh fa-spin"></i>
+                                {% else %}
+                                    {{ detection.running_time }}
+                                {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if detection.status == 'SUCCESSFUL' %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-primary">
+                    <h3 class="box-header with-border">Content</h3>
+
+                    <div class="box-body chart_container">
+                        <h5 class="text-blue"><i class="fa fa-info-circle"></i> The data displayed is normalized</h5>
+                        <div class="responsive-plot" id="original_data"
+                             data-title="Content of {{ detection.datasource.name }}"
+                             data-name="detection_{{ detection.datasource.name }}"
+                             data-yaxis="Value"
+                        >
+                            <div class="text-center">loading graph.. <i class="fa fa-spinner fa-spin"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h2>Root cause analysis</h2>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box">
+                    <h3 class="box-header with-border">Diagnostic status log</h3>
+                    <div class="box-body">
+                        <table class="table table-bordered diagnostic-log" id="diagnostic_{{ diagnostic.task_code }}"
+                                data-url="{{ url_for('diagnostic.detail', detection_task_code=diagnostic.task_code) }}"
+                                data-taskcode="{{ diagnostic.task_code }}"
+                                data-completed="{{ diagnostic.is_completed }}">
+                            <thead>
+                            <tr>
+                                <th>created</th>
+                                <th>status</th>
+                                <th>message</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for status in diagnostic.statuses %}
+
+                                <tr>
+                                    <td>{{ general_macros.format_datetime(status.created_at) }}</td>
+                                    <td>{{ status.state }}</td>
+                                    <td>{{ status.message }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right text-green text-bold">
+                                    Elapsed time: <span id="elapsed-detection-time">
+                                {% if not diagnostic.is_completed %}
+                                    <i id="status-spinner" class="fa fa-refresh fa-spin"></i>
+                                {% else %}
+                                    {{ diagnostic.running_time }}
+                                {% endif %}
+                                </span>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% if diagnostic.status == 'SUCCESSFUL' %}
+                <div class="col-lg-12">
+                    <div class="box box-primary">
+                        <h3 class="box-header with-border">Most anomalous Chunk</h3>
+                        <div class="box-body">
+                            <div class="diagnostic_container">
+                                <div class="col-lg-12 text-center">Analysis in progress.. <i class="fa fa-spinner fa-spin"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if detection.is_completed %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-danger">
+                    <h3 class="box-header with-border">Delete this detection</h3>
+                    <div class="box-body text-right">
+                        <a class="btn btn-danger" data-toggle="modal" data-target="#modal-delete-form">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal modal-warning fade" id="modal-delete-form">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Confirm deletion of {{ detection.task_code }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h4><i class="fa fa-warning"></i> Warning</h4>
+                        <p>By deleting this detection all the associated deep causes will be deleted as well.</p>
+                        <p>THIS OPERATION IS IRREVERSIBLE!</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                        <form action="{{ url_for('detection.delete', task_code=detection.task_code) }}"
+                              method="POST" id="detection-delete">
+                            <div class="form-group">
+                                <a id="delete-detection-button" class="btn btn-outline">Confirm deletion</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+    {% endif %}
+    <!-- /.modal -->
+{% endblock %}
+
+
+
+
+{% block footer_js %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/detection.js') }} "></script>
+    <script>
+        $(document).ready(function ($) {
+            function resultInterpreter(object) {
+                return object.detection
+            };
+            var refresher = new RefreshStatusTable(".detection-log", resultInterpreter);
+            refresher.run();
+            {% if detection.status == 'SUCCESSFUL' %}
+                Plotly.d3.csv("{{ url_for('datasource.data_csv', upload_code=detection.upload_code, normalize=True) }}",
+                    function (err, datasource_data) {
+                        Plotly.d3.csv(
+                            "{{ url_for('detection.result_data', task_code=detection.task_code) }}",
+                            function (err, detection_data) {
+                                DetectionChart.combinedResult("original_data", datasource_data, detection_data);
+                                ChartController.makeResponsive()
+                            });
+                    }
+                );
+
+                var diagnosticRefresher = new RefreshStatusTable(".diagnostic-log", function(object) {
+                    return object.diagnostic
+                });
+                diagnosticRefresher.run();
+
+                $('#delete-detection-button').on('click',
+                function () {
+                    $('#modal-delete-form').modal('hide');
+                    MainSpinner.show();
+                    $('#detection-delete').submit();
+                }
+            )
+            {% endif %}
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/diagnostic.js') }} "></script>
+    <script>
+        {% if diagnostic.status == 'SUCCESSFUL' %}
+            diagnosticController = new DiagnosticRefreshController('{{ url_for('diagnostic.for_plot', detection_task_code=diagnostic.task_code) }}')
+            diagnosticController.run();
+        {% endif %}
+    </script>
+{% endblock %}

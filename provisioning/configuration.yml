@@ -1,0 +1,36 @@
+admin:
+  username: admin@alpha-i.co
+  password: adminpassword
+
+user:
+  email: user@acme.com
+  password: userpass
+
+company:
+  company_name: Acme INC
+  domain_name: acme.com
+  configuration:
+    upload_manager: FlightUploadManager
+    datasource_class: alphai_watson.datasource.flight.FlightDataSource
+    datasource_interpreter: FlightDatasourceInterpreter
+    model:
+      class_name: alphai_rickandmorty_oracle.detective.RickAndMortyDetective
+      configuration:
+        model_configuration:
+          train_iters: 1
+    transformer:
+      class_name: alphai_watson.transformer.fft.FourierTransformer
+      configuration:
+          do_local_normalisation: false
+          do_log_power: false
+          number_of_sensors: 8
+          number_of_timesteps: 392
+          perform_pca: false
+
+datasource_configuration:
+  name: 1024Hz/8 Signals
+  meta:
+    sample_rate: 1024
+    number_of_sensors: 8
+
+

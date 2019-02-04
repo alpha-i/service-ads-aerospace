@@ -1,0 +1,127 @@
+{% import 'macros/macros.html' as general_macros %}
+
+{% macro print_training_list(training_list) %}
+    {% if training_list|length > 0 %}
+        <table class="table table-bordered" id="training-task-list" data-urlprefix="/training">
+            <thead>
+            <tr>
+                <th>name</th>
+                <th>flight type</th>
+                <th>domain</th>
+                <th>train set size</th>
+                <th>created</th>
+                <th>status</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for training in training_list %}
+                <tr class='task-row' id="{{ training.task_code }}" data-completed="{{ training.is_completed }}">
+                    <td scope="row"><a
+                            href="{{ url_for('training.detail', training_task_code=training.task_code) }}" title="{{ training.task_code }}">{{ training.name|truncate(25) }}</a>
+                    </td>
+                    <td>
+                        {{ training.datasource_configuration.name }}
+                    </td>
+                    <td>{% if training.has_fft_enabled %}Frequency {% else %}Time{% endif %}</td>
+                    <td>{{ training.datasources|length }} flight(s)</td>
+                    <td>{{ general_macros.format_datetime(training.created_at) }}</td>
+                    <td><i class="fa {{ general_macros.get_task_status_icon(training.statuses[-1].state) }}"
+                           alt="{{ training.statuses[-1].state }}"></i></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No training found.</p>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro print_training_details(training) %}
+    <div class="row">
+        <div class="col-lg-6">
+            <dl class="dl-horizontal">
+                <dt>Name</dt>
+                <dd>
+                    <a href="{{ url_for('training.detail', training_task_code=training.task_code) }}">{{ training.name }}</a>
+                </dd>
+
+                <dt>Code</dt>
+
+                <dd>{{ training.task_code }}</dd>
+
+                <dt>Created</dt>
+                <dd>{{ general_macros.format_datetime(training.created_at) }}</dd>
+
+                <dt>Status</dt>
+                <dd>{{ training.statuses[-1].state }}</dd>
+                <dt>Flight Type</dt>
+                <dd>{{ training.datasource_configuration.name }}</dd>
+                <dt>Domain</dt>
+                <dd>{% if training.has_fft_enabled %}Frequency{% else %}Time{% endif %}</dd>
+
+            </dl>
+        </div>
+        <div class="col-lg-6">
+            <dl class="dl-horizontal">
+
+                <dt>Trained on</dt>
+                <dd>{{ training.datasources|length }} flights (<a href="#modal-flight-list" data-toggle="modal"
+                                                                  data-target="#modal-flight-list">view</a>)
+                </dd>
+
+                <dt>Is a retrain</dt>
+                <dd>{% if training.parent_task %} Yes {% else %} No {% endif %}</dd>
+
+                <dt>Training iterations</dt>
+                <dd>{{ training.configuration.model.configuration.model_configuration.train_iters }}</dd>
+
+                {% if training.parent_task %}
+                    <dt>Parent Task</dt>
+                    <dd>
+                        <a href="{{ url_for('training.detail', training_task_code=training.parent_task.task_code) }}">{{ training.parent_task.name }}</a>
+                    </dd>
+                {% endif %}
+
+                <dt>Downsampling factor</dt>
+                <dd>{{ training.configuration.transformer.configuration.downsample_factor }}</dd>
+
+                <dt>Number of timesteps</dt>
+                <dd>{{ training.configuration.transformer.configuration.number_of_timesteps }}</dd>
+
+                <dt>Sample rate</dt>
+                <dd>{{ training.datasource_configuration.meta.sample_rate }}</dd>
+
+                <dt>Chunk duration</dt>
+                {% set sample_rate = training.datasource_configuration.meta.sample_rate|int %}
+                {% set number_of_timesteps = training.configuration.transformer.configuration.number_of_timesteps|int %}
+                <dd>{{ (number_of_timesteps / sample_rate)|round(2) }}s</dd>
+
+            </dl>
+        </div>
+        <div class="modal  fade" id="modal-flight-list" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Source flightS for training "{{ training.name }}"</h4>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list">
+                        {% for datasource in training.datasources %}
+                            <li>{{ datasource.name }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+    </div>
+{% endmacro %}

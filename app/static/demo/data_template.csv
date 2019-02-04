@@ -1,0 +1,2 @@
+number_people,date,timestamp,day_of_week,is_weekend,is_holiday,temperature,is_start_of_semester,is_during_semester,month,hour
+37,2017-08-14 17:00:11-07:00,61211,4,0,0,71.76,0,0,8,17

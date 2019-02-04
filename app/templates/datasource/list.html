@@ -1,0 +1,77 @@
+{% extends "layout/main.html" %}
+
+{% set page_title %}Flight list{% endset %}
+
+{% block page_header %}
+    <h1>Flight list</h1>
+{% endblock %}
+{% block breadcrumb_items %}
+    {{ super() }}
+    <li><a class="active"><i class="fa fa-upload"></i> Flight list</a></li>
+{% endblock %}
+
+{% block content %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box">
+                    <h3 class="box-header with-border">Add new flight</h3>
+                    <div class="box-body">
+                        {% if datasource_types %}
+                            {% include "partial/datasource_upload.html" %}
+                        {% else %}
+                            No data source type found, please add one.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% if datasources %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box">
+                    <h3 class="box-header with-border">Flights</h3>
+                    <div class="box-body">
+                        <table class="table table-bordered">
+                            <tbody>
+                            <tr>
+                                <th>name</th>
+                                <th>upload code</th>
+                                <th>label</th>
+                                <th>flight type</th>
+                                <th>uploaded on</th>
+                            </tr>
+                            {% for datasource in datasources %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('datasource.detail', upload_code=datasource.upload_code) }}">{{ datasource.name|truncate(25) }}</a>
+                                    </td>
+                                    <td>{{ datasource.upload_code }}</td>
+                                    <td>{{ datasource.label.value|default('unlabelled') }}</td>
+                                    <td>{{ datasource.datasource_configuration.name }}</td>
+                                    <td>{{ general_macros.format_datetime(datasource.last_update) }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div class="text-center">
+                            {{   general_macros.display_paginator(pagination, current_page, 'datasource.list')  }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+{% endblock %}
+
+{% block footer_js %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/upload.js') }} "></script>
+    <script>
+        $(document).ready(function () {
+            UploadForm.init()
+        });
+    </script>
+{% endblock %}

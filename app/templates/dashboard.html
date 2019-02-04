@@ -1,0 +1,120 @@
+{% extends "layout/main.html" %}
+{% import 'macros/macros.html' as general_macros %}
+{% import 'macros/detect.html' as detect_macros %}
+{% import 'macros/training.html' as train_macros %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block page_header %}
+    <h1>
+        Overview
+        <small>Here's the overview of your status</small>
+    </h1>
+{% endblock %}
+{% block breadcrumb_items %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="box box-primary">
+                <h3 class="box-header with-border">Latest flights</h3>
+                <div class="box-body">
+                    {% if datasources %}
+                        <table class="table table-bordered">
+                            <tbody>
+                            <tr>
+                                <th>name</th>
+                                <th>label</th>
+                                <th>type</th>
+                                <th>last updated</th>
+                            </tr>
+                            {% for datasource in datasources %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('datasource.detail', upload_code=datasource.upload_code) }}">{{ datasource.name }}</a>
+                                    </td>
+                                    <td>{{ datasource.label.name|default('UNLABELLED')|capitalize }}</td>
+                                    <td>{{ datasource.datasource_configuration.name }}</td>
+                                    <td>{{ general_macros.format_datetime(datasource.last_update) }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No data was uploaded.</p>
+                        <p><a class="btn btn-primary nounderline"
+                              href="{{ url_for('datasource.list') }}"><span class="fa fa-upload"></span>
+                            Upload</a></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="box box-primary">
+                <h3 class="box-header with-border">Flight Types</h3>
+                <div class="box-body">
+                    {% if datasource_configurations %}
+                        <table class="table table-bordered">
+                            <tbody>
+                            <tr>
+                                <th>name</th>
+                                <th>meta</th>
+                            </tr>
+
+                        {% for datasource_config in datasource_configurations %}
+                            <tr>
+                                <td>{{ datasource_config.name }}</td>
+                                <td>
+                                    <dl class="dl-horizontal">
+                                        <dt>Sample rate</dt>
+                                        <dd>{{datasource_config.meta.sample_rate}}</dd>
+                                        <dt>Number of sensors</dt>
+                                        <dd>{{datasource_config.meta.number_of_sensors}}</dd>
+                                    </dl>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                            </tbody>
+                        </table>
+                    {% else %}
+                         <p>No flight configuration found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="box box-success">
+                <h3 class="box-header with-border">Latest training</h3>
+                <div class="box-body">
+                    {{ train_macros.print_training_list(training_task_list) }}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="box box-primary">
+                <h3 class="box-header with-border">Latest detections</h3>
+                <div class="box-body">
+                    {{ detect_macros.print_detection_task_list(detection_task_list) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block footer_js %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/datasource.js') }} "></script>
+    <script>
+        $(document).ready(function ($) {
+            var refresher = new RefreshTaskList('#datasource-task-list', DataSourceResultInterpreter, DataSourceRowBuilder);
+            refresher.run();
+        });
+    </script>
+{% endblock %}

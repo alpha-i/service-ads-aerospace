@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+{% include 'partial/html_header.html' %}
+{% import 'macros/macros.html' as general_macros %}
+{% import 'macros/detect.html' as detect_macros %}
+{% import 'macros/datasource.html' as datasource_macros %}
+{% import 'macros/training.html' as training_macros %}
+<body class="hold-transition skin-alpha-i sidebar-mini">
+<div class="wrapper">
+{% include 'partial/main_header.html' %}
+{% include 'partial/main_sidebar.html' %}
+
+
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        {% block content_header %}
+            {% block page_header %}
+                  <h1>
+                    Page Header
+                    <small>Optional description</small>
+                  </h1>
+                {% endblock %}
+            <ol class="breadcrumb">
+                {% block breadcrumb_items %}
+                    <li><a href="{{ url_for('customer.dashboard') }}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+                {% endblock %}
+            </ol>
+        {% endblock %}
+    </section>
+
+    <!-- Main content -->
+    <section class="content container-fluid">
+      {{ general_macros.print_flash_messages() }}
+      {% block content %}{% endblock %}
+
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Main Footer -->
+  <footer class="main-footer">
+    <!-- To the right -->
+    <div class="pull-right hidden-xs">
+      <a href="https://www.alpha-i.co/contacts/" target="_blank">Contact Us</a>
+    </div>
+    <!-- Default to the left -->
+    <strong>Copyright &copy; 2018 <a href="https://www.alpha-i.co/" target="_blank">Alpha-I</a>.</strong> All rights reserved.
+  </footer>
+
+</div>
+
+</div>
+<!-- ./wrapper -->
+
+{% block footer_js %}
+    {%  include 'partial/footer_js.html' %}
+    <script>
+      $(function () {
+        $('input').iCheck({
+          checkboxClass: 'icheckbox_square-blue',
+          radioClass: 'iradio_square-blue',
+          increaseArea: '20%' /* optional */
+        });
+      });
+    </script>
+{% endblock %}
+</body>
+</html>
